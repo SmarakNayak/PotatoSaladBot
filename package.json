@@ -1,0 +1,38 @@
+{
+  "name": "potatosaladbot",
+  "version": "1.0.0",
+  "description": "A Discord Bot that plays intro music on chat join",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon -r dotenv/config index.js",
+    "test": "ava"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CassandraSpruit/PotatoSaladBot.git"
+  },
+  "keywords": [
+    "discord",
+    "music",
+    "bot"
+  ],
+  "author": "Cassandra Spruit",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CassandraSpruit/PotatoSaladBot/issues"
+  },
+  "homepage": "https://github.com/CassandraSpruit/PotatoSaladBot#readme",
+  "devDependencies": {
+    "@babel/core": "^7.7.7",
+    "@babel/preset-env": "^7.7.7",
+    "ava": "^2.4.0",
+    "nodemon": "^2.0.2",
+    "xo": "^0.25.3"
+  },
+  "dependencies": {
+    "babel-plugin-dotenv": "^0.1.1",
+    "discord.js": "^11.5.1",
+    "dotenv": "^8.2.0"
+  }
+}
