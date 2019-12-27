@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon -r dotenv/config index.js",
-    "test": "ava"
+    "dev": "nodemon -r dotenv/config index.js"
   },
   "repository": {
     "type": "git",
@@ -24,15 +23,12 @@
   },
   "homepage": "https://github.com/CassandraSpruit/PotatoSaladBot#readme",
   "devDependencies": {
-    "@babel/core": "^7.7.7",
-    "@babel/preset-env": "^7.7.7",
-    "ava": "^2.4.0",
-    "nodemon": "^2.0.2",
-    "xo": "^0.25.3"
+    "nodemon": "^2.0.2"
   },
   "dependencies": {
-    "babel-plugin-dotenv": "^0.1.1",
     "discord.js": "^11.5.1",
-    "dotenv": "^8.2.0"
+    "dotenv": "^8.2.0",
+    "node-opus": "^0.3.3",
+    "ytdl-core": "^1.0.5"
   }
 }
