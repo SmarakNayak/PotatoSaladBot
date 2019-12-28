@@ -30,6 +30,9 @@ client.on('message', async message => {
             if (command.startsWith('help')) {
                 reply = helpCommand();
             }
+            if (command.startsWith('clear')) {
+                reply = clearCommand(message.author.id);
+            }
         }
         message.reply(reply || randomWhatever());
     }
@@ -90,7 +93,9 @@ function getRandomSuccess() {
         'Yo pass the aux cord.',
         'But is it a banger?',
         'Ugh fine, but I am going to complain about it the whole time. (jk imma bot)',
-        ':musical_note:'
+        ':musical_note:',
+        ':ok_hand: Got it.',
+        ':ok_hand:'
     ];
     const r = Math.floor(Math.random() * (successStatements.length));
     return successStatements[r];
@@ -240,4 +245,12 @@ function helpCommand() {
     reply += '\n' + 'Set length to "full" or "all" if you want to play the entire clip.';
 
     return reply;
+}
+
+function clearCommand(id) {
+    store.clear(`${id}:url`);
+    store.clear(`${id}:length`);
+    store.clear(`${id}:volume`);
+
+    return `Cleared out info. I won't play anything when you join a chat.`;
 }
