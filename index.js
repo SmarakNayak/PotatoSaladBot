@@ -21,10 +21,17 @@ client.on('message', async message => {
     if (message.content.startsWith(botCmd)) {
         const command = message.content.substr(botCmd.length).trim();
         if (command) {
-            reply = setCommand(command, message.author.id);
+            if (command.startsWith('set')) {
+                reply = setCommand(command, message.author.id);
+            }
+            if (command.startsWith('view')) {
+                reply = await viewCommand(command, message.author.id);
+            }
+            if (command.startsWith('help')) {
+                reply = helpCommand();
+            }
         }
-
-        message.reply(reply || 'OwO');
+        message.reply(reply || randomWhatever());
     }
 });
 client.on('voiceStateUpdate', async (oldMember, newMember) => {
@@ -37,14 +44,17 @@ client.on('voiceStateUpdate', async (oldMember, newMember) => {
         const connection = await voiceChannel.join();
         const stream = ytdl(song);
         const dispatcher = connection.playStream(stream);
+        dispatcher.on('start', () => {
+            if (len !== -1) {
+                setTimeout(() => {
+                    dispatcher.end();
+
+                    voiceChannel.leave();
+                }, (len || defaultLength) * 1000);
+            }
+        });
         // Use your indoor voice, Potato.
         dispatcher.setVolume(vol || defaultVolume);
-        if (len !== -1) {
-            setTimeout(() => {
-                dispatcher.end();
-                voiceChannel.leave();
-            }, (len || defaultLength) * 1000);
-        }
     } else {
         oldMember.voiceChannel.leave();
         console.log(newMember.displayName + ' disconnected from ' + oldMember.voiceChannel.name);
@@ -105,6 +115,40 @@ function getRandomFailure() {
     return failureStatements[r];
 }
 
+function randomWhatever() {
+    const whatevergifs = [
+        'https://tenor.com/view/kermit-gif-10378766',
+        'https://tenor.com/view/umm-confused-wtf-blinking-okay-gif-7513882',
+        'https://tenor.com/view/funny-face-who-me-gif-13094581',
+        'https://tenor.com/view/awkward-simpsons-weirdo-gif-5331952',
+        `https://tenor.com/view/awkward-blonde-child-can-you-not-why-gif-4950390`,
+        'https://tenor.com/view/embarrassed-spongebob-em-gif-4355239',
+        'https://tenor.com/view/the-simpsons-homer-simpson-good-bye-bye-hide-gif-4983317',
+        'https://tenor.com/view/shit-hide-run-cat-embarrassed-gif-10009816',
+        `https://tenor.com/view/penguin-hide-you-didnt-see-anything-penguins-of-madagascar-gif-15123878`,
+        `https://tenor.com/view/what-do-you-want-awkward-stare-really-gif-14351563`,
+        `https://tenor.com/view/hello-yes-hello-dog-here-gif-10652207`,
+        `https://tenor.com/view/sure-john-cena-gif-5783187`,
+        'OwO',
+        'https://tenor.com/view/owo-delet-this-gif-12781064',
+        'https://tenor.com/view/fabulous-gif-9282197',
+        'https://tenor.com/view/dog-uwuw-zoom-in-happy-gif-12094646',
+        'https://tenor.com/view/cat-peek-aboo-kitty-white-cat-cute-cat-gif-14227402',
+        'https://tenor.com/view/ludicolo-gif-13599271',
+        'https://tenor.com/view/salad-cat-gif-5526742',
+        'https://tenor.com/view/potato-gif-9783276',
+        'https://tenor.com/view/why-would-yous-say-something-so-controversial-controversial-gif-15274636',
+        'https://tenor.com/view/hide-hiding-nope-embarrassed-ashamed-gif-3481570',
+        'https://tenor.com/view/box-hide-face-asian-girl-gif-4641619',
+        'https://tenor.com/view/meangirls-embarrassed-hiding-gif-5094641',
+        'https://tenor.com/view/hiding-gif-10030312',
+        'https://tenor.com/view/antelope-deer-slide-nope-bye-gif-14557765',
+        'https://tenor.com/view/animal-cat-camera-funny-cute-gif-12929257'
+    ];
+    const r = Math.floor(Math.random() * (whatevergifs.length));
+    return whatevergifs[r];
+}
+
 function setCommand(command, id) {
     let url;
     let length;
@@ -114,7 +158,7 @@ function setCommand(command, id) {
     let fail;
 
     // Set URL
-    const urlMatch = command.match(/url (.*)\s?/);
+    const urlMatch = command.match(/url (.*?)(\s|$)/);
     const lengthMatch = command.match(/length (\w*)%?\s?/);
     const volMatch = command.match(/(volume|vol) (\w*)%\s?/);
     if (urlMatch && urlMatch.length && urlMatch[1]) {
@@ -132,7 +176,7 @@ function setCommand(command, id) {
     }
 
     if (url) {
-        success.push(`to ${url}`);
+        success.push(`to <${url}>`);
         storeSet(id, url);
     }
 
@@ -166,6 +210,34 @@ function setCommand(command, id) {
     reply = success.length ? '\n' + getRandomSuccess() + '\n' + `I'll set your current song ` + success.join(' ') + '.' : '';
     reply += fail ? '\n' + getRandomFailure() + '\n' + fail : '';
     reply += info ? '\n' + info : '';
+
+    return reply;
+}
+
+async function viewCommand(command, id) {
+    const url = await store.get(`${id}:url`);
+    const vol = await store.get(`${id}:volume`);
+    const len = await store.get(`${id}:length`);
+    if (!url || !vol || !len) return `I've got nothing for ya.`;
+    let reply = '';
+    reply += '\n' + '**Url**: ' + url;
+    reply += '\n' + '**Length**: ' + len + ' seconds';
+    reply += '\n' + '**Volume**: ' + Math.floor(vol * 100) + '%';
+
+    return reply;
+}
+
+function helpCommand() {
+    let reply = '';
+    reply += '\n' + `:wave: Hey! I'm Potato Salad Bot.`;
+    reply += '\n' + `I play sound clips when you enter a chat.`;
+    reply += '\n' + `You can get my attention with !salad and then enter the command`;
+    reply += '\n' + '**help**: View this message! You are here.';
+    reply += '\n' + '**view**: View what I have on record for you.';
+    reply += '\n' + '**set**: Set the url, volume, and length of the sound clip you want to play';
+    reply += '\n' + 'Example: !salad set url <https://www.youtube.com/watch?v=dQw4w9WgXcQ> length 5 vol 15%';
+    reply += '\n' + `You can also leave out the length and volume and it'll set it to default.`;
+    reply += '\n' + 'Set length to "full" or "all" if you want to play the entire clip.';
 
     return reply;
 }
