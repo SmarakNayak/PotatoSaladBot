@@ -239,6 +239,7 @@ function helpCommand() {
     reply += '\n' + `You can get my attention with !salad and then enter the command`;
     reply += '\n' + '**help**: View this message! You are here.';
     reply += '\n' + '**view**: View what I have on record for you.';
+    reply += '\n' + '**clear**: Clear what I have on record';
     reply += '\n' + '**set**: Set the url, volume, and length of the sound clip you want to play';
     reply += '\n' + 'Example: !salad set url <https://www.youtube.com/watch?v=dQw4w9WgXcQ> length 5 vol 15%';
     reply += '\n' + `You can also leave out the length and volume and it'll set it to default.`;
