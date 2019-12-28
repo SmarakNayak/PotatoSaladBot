@@ -8,7 +8,7 @@ const defaultVolume = 0.1; // Percentage of 1
 const defaultLength = 30; // In seconds
 
 const client = new Discord.Client();
-const store = new Keyv();
+const store = new Keyv(`mysql://${process.env.MYSQL_USER}:${process.env.MYSQL_PASS}@localhost:${process.env.MYSQL_PORT}/potatosalad`);
 store.on('error', err => console.error('Keyv connection error:', err));
 
 client.on('ready', () => {
