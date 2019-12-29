@@ -2,6 +2,7 @@ require('dotenv').config();
 const Discord = require('discord.js');
 const ytdl = require('ytdl-core');
 const Keyv = require('keyv');
+const moment = require('moment');
 
 // Presets
 const defaultVolume = 0.1; // Percentage of 1
@@ -33,6 +34,9 @@ client.on('message', async message => {
             if (command.startsWith('clear')) {
                 reply = clearCommand(message.author.id);
             }
+            if (command.startsWith('mute')) {
+                reply = muteCommand(command, message.author.id);
+            }
         }
         message.reply(reply || randomWhatever());
     }
@@ -41,7 +45,15 @@ client.on('voiceStateUpdate', async (oldMember, newMember) => {
     const song = await store.get(`${newMember.id}:url`);
     const vol = await store.get(`${newMember.id}:volume`);
     const len = await store.get(`${newMember.id}:length`);
+    const mute = await store.get(`${newMember.id}:mute`);
     if (!song) return;
+    if (mute) {
+        if (new Date(mute) > new Date()) {
+            return;
+        } else {
+            store.clear(`${newMember.id}:mute`);
+        }
+    }
     if (newMember.voiceChannel) {
         const voiceChannel = newMember.voiceChannel;
         const connection = await voiceChannel.join();
@@ -51,16 +63,11 @@ client.on('voiceStateUpdate', async (oldMember, newMember) => {
             if (len !== -1) {
                 setTimeout(() => {
                     dispatcher.end();
-
-                    voiceChannel.leave();
                 }, (len || defaultLength) * 1000);
             }
         });
         // Use your indoor voice, Potato.
         dispatcher.setVolume(vol || defaultVolume);
-    } else {
-        oldMember.voiceChannel.leave();
-        console.log(newMember.displayName + ' disconnected from ' + oldMember.voiceChannel.name);
     }
 });
 
@@ -223,11 +230,20 @@ async function viewCommand(command, id) {
     const url = await store.get(`${id}:url`);
     const vol = await store.get(`${id}:volume`);
     const len = await store.get(`${id}:length`);
-    if (!url || !vol || !len) return `I've got nothing for ya.`;
+    const mute = await store.get(`${id}:mute`);
+    if (!url || !vol || !len || !mute) return `I've got nothing for ya.`;
     let reply = '';
     reply += '\n' + '**Url**: ' + url;
     reply += '\n' + '**Length**: ' + len + ' seconds';
     reply += '\n' + '**Volume**: ' + Math.floor(vol * 100) + '%';
+    if (mute) {
+        const untilDate = new Date(mute);
+        if (untilDate > new Date()) {
+            reply += '\n' + '**Mute**: ' + moment(untilDate).format('LTS - l');
+        } else {
+            store.clear(`${id}:mute`);
+        }
+    }
 
     return reply;
 }
@@ -240,6 +256,7 @@ function helpCommand() {
     reply += '\n' + '**help**: View this message! You are here.';
     reply += '\n' + '**view**: View what I have on record for you.';
     reply += '\n' + '**clear**: Clear what I have on record';
+    reply += '\n' + '**mute**: Pause playing for the next X (s,m,h,d)';
     reply += '\n' + '**set**: Set the url, volume, and length of the sound clip you want to play';
     reply += '\n' + 'Example: !salad set url <https://www.youtube.com/watch?v=dQw4w9WgXcQ> length 5 vol 15%';
     reply += '\n' + `You can also leave out the length and volume and it'll set it to default.`;
@@ -252,6 +269,62 @@ function clearCommand(id) {
     store.clear(`${id}:url`);
     store.clear(`${id}:length`);
     store.clear(`${id}:volume`);
+    store.clear(`${id}:mute`);
 
     return `Cleared out info. I won't play anything when you join a chat.`;
+}
+
+function muteCommand(command, id) {
+    const timeMatch = command.match(/(\d*)(s|m|h)/);
+    // Default to 5 minutes
+    let time = 5;
+    let timeUnit = 'm';
+    let units = 'minutes';
+    let ms = 5000;
+    let reply;
+
+    if (timeMatch && timeMatch.length && timeMatch[1]) {
+        time = timeMatch[1];
+        if (timeMatch[2]) {
+            timeUnit = timeMatch[2];
+        }
+    };
+
+    switch(timeUnit) {
+        case 's':
+        case 'sec':
+        case 'seconds':
+        case 'second':
+            units = 'second(s)';
+            ms = time * 1000;
+            break;
+        case 'm':
+        case 'min':
+        case 'minutes':
+        case 'minute':
+            units = 'minute(s)';
+            ms = time * 1000 * 60;
+            break;
+        case 'h':
+        case 'hours':
+        case 'hour':
+            units = 'hour(s)';
+            ms = time * 1000 * 60 * 60;
+            break;
+        case 'd':
+        case 'day':
+        case 'days':
+            units = 'day(s)';
+            ms = time * 1000 * 60 * 60 * 24;
+            break;
+        default:
+            units = 'minute(s)';
+            ms = time * 1000 * 60;
+            break;
+    }
+
+    reply = `Okay, I'll keep quiet for the next ${time} ${units}`;
+    const stopPauseAt = new Date().getTime() + ms;
+    store.set(`${id}:mute`, stopPauseAt);
+    return reply;
 }
