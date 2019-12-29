@@ -13,6 +13,10 @@ A Discord bot that plays intro music when someone joins the chat
 - **help** - View commands
 - **view** - View what PSB has on record for your user
 - **clear** - Clear what PSB has on record for your user
+- **mute** - Mute PSB for a specified amount of time for your user. If no time is specified, the default is 5 minutes.
+    - Example:
+        - !salad mute (Mute for 5 minutes)
+        - !salad mute 5h (Mute for 5 hours)
 - **set**
     - **(url: url string)**: Url to play when you enter a voice channel. If length and volume are not specified, it'll play at 20% for 30 seconds by default.
     - **(length: number | "full")**: Number of seconds. Enter "full" or "all" to play the whole thing.
