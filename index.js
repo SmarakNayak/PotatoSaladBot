@@ -17,7 +17,6 @@ client.on('ready', () => {
 });
 client.on('message', async message => {
     const botCmd = '!salad';
-    const helpCmd = 'help';
     let reply = '';
     if (message.content.startsWith(botCmd)) {
         const command = message.content.substr(botCmd.length).trim();
@@ -51,11 +50,12 @@ client.on('voiceStateUpdate', async (oldMember, newMember) => {
         if (new Date(mute) > new Date()) {
             return;
         } else {
-            store.clear(`${newMember.id}:mute`);
+            store.delete(`${newMember.id}:mute`);
         }
     }
-    if (newMember.voiceChannel) {
+    if (newMember.voiceChannel !== oldMember.voiceChannel && newMember.voiceChannel) {
         const voiceChannel = newMember.voiceChannel;
+        console.log(`${newMember.displayName} has joined ${newMember.voiceChannel.name}.`);
         const connection = await voiceChannel.join();
         const stream = ytdl(song);
         const dispatcher = connection.playStream(stream);
@@ -68,6 +68,14 @@ client.on('voiceStateUpdate', async (oldMember, newMember) => {
         });
         // Use your indoor voice, Potato.
         dispatcher.setVolume(vol || defaultVolume);
+    }
+    if (!newMember.voiceChannel) {
+        // Check if the last person left the channel
+        console.log(`${newMember.displayName} has left ${oldMember.voiceChannel.name}.`);
+        if (oldMember.voiceChannel && oldMember.voiceChannel.members.size <= 1) {
+            console.log(`Every one else left ${oldMember.voiceChannel.name}. Leaving too.`);
+            oldMember.voiceChannel.leave();
+        }
     }
 });
 
@@ -231,17 +239,17 @@ async function viewCommand(command, id) {
     const vol = await store.get(`${id}:volume`);
     const len = await store.get(`${id}:length`);
     const mute = await store.get(`${id}:mute`);
-    if (!url || !vol || !len || !mute) return `I've got nothing for ya.`;
+    if (!url && !vol && !len && !mute) return `I've got nothing for ya.`;
     let reply = '';
-    reply += '\n' + '**Url**: ' + url;
-    reply += '\n' + '**Length**: ' + len + ' seconds';
-    reply += '\n' + '**Volume**: ' + Math.floor(vol * 100) + '%';
+    reply += url ? '\n' + '**Url**: ' + url : '';
+    reply += len ? '\n' + '**Length**: ' + len + ' seconds' : '';
+    reply += vol ? '\n' + '**Volume**: ' + vol + '%' : '';
     if (mute) {
         const untilDate = new Date(mute);
         if (untilDate > new Date()) {
             reply += '\n' + '**Mute**: ' + moment(untilDate).format('LTS - l');
         } else {
-            store.clear(`${id}:mute`);
+            store.delete(`${id}:mute`);
         }
     }
 
@@ -261,15 +269,16 @@ function helpCommand() {
     reply += '\n' + 'Example: !salad set url <https://www.youtube.com/watch?v=dQw4w9WgXcQ> length 5 vol 15%';
     reply += '\n' + `You can also leave out the length and volume and it'll set it to default.`;
     reply += '\n' + 'Set length to "full" or "all" if you want to play the entire clip.';
+    reply += '\n' + `You can also DM me if you don't want your selection to show on the server`;
 
     return reply;
 }
 
 function clearCommand(id) {
-    store.clear(`${id}:url`);
-    store.clear(`${id}:length`);
-    store.clear(`${id}:volume`);
-    store.clear(`${id}:mute`);
+    store.delete(`${id}:url`);
+    store.delete(`${id}:length`);
+    store.delete(`${id}:volume`);
+    store.delete(`${id}:mute`);
 
     return `Cleared out info. I won't play anything when you join a chat.`;
 }
