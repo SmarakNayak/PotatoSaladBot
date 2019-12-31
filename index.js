@@ -243,7 +243,7 @@ async function viewCommand(command, id) {
     let reply = '';
     reply += url ? '\n' + '**Url**: ' + url : '';
     reply += len ? '\n' + '**Length**: ' + len + ' seconds' : '';
-    reply += vol ? '\n' + '**Volume**: ' + vol + '%' : '';
+    reply += vol ? '\n' + '**Volume**: ' + Math.floor(vol * 100) + '%' : '';
     if (mute) {
         const untilDate = new Date(mute);
         if (untilDate > new Date()) {
