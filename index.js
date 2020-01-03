@@ -179,8 +179,8 @@ function setCommand(command, id) {
 
     // Set URL
     const urlMatch = command.match(/url (.*?)(\s|$)/);
-    const lengthMatch = command.match(/length (\w*)%?\s?/);
-    const volMatch = command.match(/(volume|vol) (\w*)%\s?/);
+    const lengthMatch = command.match(/(length|len|at) (\w*)%?\s?/);
+    const volMatch = command.match(/(volume|vol|girth|for) (\w*)%\s?/);
     if (urlMatch && urlMatch.length && urlMatch[1]) {
         url = urlMatch[1];
     };
@@ -266,7 +266,7 @@ function helpCommand() {
     reply += '\n' + '**clear**: Clear what I have on record';
     reply += '\n' + '**mute**: Pause playing for the next X (s,m,h,d)';
     reply += '\n' + '**set**: Set the url, volume, and length of the sound clip you want to play';
-    reply += '\n' + 'Example: !salad set url <https://www.youtube.com/watch?v=dQw4w9WgXcQ> length 5 vol 15%';
+    reply += '\n' + 'Example: !salad set url <https://www.youtube.com/watch?v=dQw4w9WgXcQ> for 5 at 15%';
     reply += '\n' + `You can also leave out the length and volume and it'll set it to default.`;
     reply += '\n' + 'Set length to "full" or "all" if you want to play the entire clip.';
     reply += '\n' + `You can also DM me if you don't want your selection to show on the server`;
