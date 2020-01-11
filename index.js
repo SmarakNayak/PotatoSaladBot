@@ -3,6 +3,7 @@ const Discord = require('discord.js');
 const ytdl = require('ytdl-core');
 const Keyv = require('keyv');
 const moment = require('moment');
+const random = require('@cspruit/serendipity').random;
 
 // Presets
 const defaultVolume = 0.1; // Percentage of 1
@@ -131,7 +132,7 @@ function getRandomFailure() {
         `:musical_note: All around me are familiar faces... :musical_note:`,
         `:musical_note: Hello darkness my old friend... :musical_note:`
     ];
-    const r = Math.floor(Math.random() * (failureStatements.length));
+    const r = random(failureStatements.length);
     return failureStatements[r];
 }
 
@@ -165,7 +166,7 @@ function randomWhatever() {
         'https://tenor.com/view/antelope-deer-slide-nope-bye-gif-14557765',
         'https://tenor.com/view/animal-cat-camera-funny-cute-gif-12929257'
     ];
-    const r = Math.floor(Math.random() * (whatevergifs.length));
+    const r = random(whatevergifs.length);
     return whatevergifs[r];
 }
 
