@@ -120,16 +120,16 @@ client.on('voiceStateUpdate', async (oldMember, newMember) => {
             });
 
             player.on(AudioPlayerStatus.Playing, () => {
-                try{
-                    console.log("Stream started")
-                    if(len !== -1) {
-                        setTimeout(() => {
+                console.log("Stream started")
+                if(len !== -1) {
+                    setTimeout(() => {
+                        try{                    
                             connection.destroy()
-                        }, len * 1000);
-                    }         
-                } catch (error) {
-                    console.log(error)
-                }                           
+                        } catch (error) {
+                            console.log(error)
+                        }
+                    }, len * 1000);
+                }
             })
 
             // Use your indoor voice, Potato.
@@ -409,9 +409,9 @@ function helpAoeCommand() {
     reply += '\n' + '**help**: View this message! You are here.';
     reply += '\n' + '**view**: View your profile_id';
     reply += '\n' + '**clear**: Clear your profile_id';
-    reply += '\n' + '**set**: Set your profile_id';
-    reply += '\n' +  '**last_match**: Get details about your last match';
+    reply += '\n' + '**set**: Set your profile_id';    
     reply += '\n' + 'Example: !aoe set profile_id 3010325';
+    reply += '\n' + '**last_match**: Get details about your last match';
     reply += '\n' + 'You can find your profile_id in the address bar at https://www.aoe2insights.com/';
 
     return reply;
@@ -430,8 +430,6 @@ async function getLastAoeMatchDetails(id){
     try {
         const response = await fetch(`https://aoe2.net/api/player/lastmatch?game=aoe2de&profile_id=${profile_id}`)
         const matchData = await response.json();
-        console.log(matchData)
-        console.log(matchData)
         const date = Date(matchData.last_match.started)
         reply += '\n' + `Player ${matchData.name} from ${matchData.country} played a game on ${date}`;
         reply += matchData.last_match.average_rating ? '\n' + `Avg rating was ${matchData.last_match.average_rating}` : '';
@@ -440,7 +438,7 @@ async function getLastAoeMatchDetails(id){
 
         matchData.last_match.players.map((player) => {
             reply += '\n' + `   **${player.name}**`;
-            reply += player.won ? ' - **WON**' :' - **LOST**';
+            reply += player.won ? ' - **WON**   👑' :' - **LOST**   🤡';
             reply += '\n' + `Team Rating: ${player.rating}`;
             reply += player.country ? ` | Country: ${player.country}` : '';
             reply += ` | Civ: ${convertCiv(player.civ)}`;
