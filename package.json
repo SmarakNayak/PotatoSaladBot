@@ -26,13 +26,17 @@
     "nodemon": "^2.0.2"
   },
   "dependencies": {
-    "@cspruit/serendipity": "^1.0.2",
-    "@keyv/mysql": "^1.1.4",
-    "discord.js": "^11.5.1",
-    "dotenv": "^8.2.0",
-    "keyv": "^4.0.0",
-    "moment": "^2.24.0",
-    "node-opus": "^0.3.3",
-    "ytdl-core": "^1.0.5"
+    "@cspruit/serendipity": "*",
+    "@discordjs/opus": "*",
+    "@discordjs/voice": "^0.8.0",
+    "@keyv/mysql": "*",
+    "discord-ytdl-core": "^5.0.4",
+    "discord.js": "^13.6.0",
+    "dotenv": "^16.0.0",
+    "keyv": "*",
+    "libsodium": "^0.7.10",
+    "libsodium-wrappers": "^0.7.10",
+    "moment": "*",
+    "ytdl-core": "^4.11.0"
   }
 }
