@@ -11,7 +11,7 @@ const {
     createAudioResource,
     joinVoiceChannel,
 } = require('@discordjs/voice');
-
+const fetch = require('node-fetch');
 
 // Presets
 const defaultVolume = 1; // Percentage of 1
@@ -31,7 +31,7 @@ store.on('error', err => console.error('Keyv connection error:', err));
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}`);
 });
-client.on('message', async message => {
+client.on('messageCreate', async message => {
     const botCmd = '!salad';
     let reply = '';
     if (message.content.startsWith(botCmd)) {
@@ -48,6 +48,28 @@ client.on('message', async message => {
             }
             if (command.startsWith('clear')) {
                 reply = clearCommand(message.author.id);
+            }
+        }
+        message.reply(reply || randomWhatever());
+    }
+    const botAoeCmd = '!aoe';
+    if (message.content.startsWith(botAoeCmd)) {
+        const command = message.content.substr(botAoeCmd.length).trim();
+        if (command) {
+            if (command.startsWith('set')) {
+                reply = setAoeCommand(command, message.author.id);
+            }
+            if (command.startsWith('view')) {
+                reply = await viewAoeCommand(command, message.author.id);
+            }
+            if (command.startsWith('help')) {
+                reply = helpAoeCommand();
+            }
+            if (command.startsWith('clear')) {
+                reply = clearAoeCommand(message.author.id);
+            }
+            if (command.startsWith('last_match')) {
+                reply = await getLastAoeMatchDetails(message.author.id)
             }
         }
         message.reply(reply || randomWhatever());
@@ -331,4 +353,126 @@ function clearCommand(id) {
     store.delete(`${id}:start`);
 
     return `Cleared out info. I won't play anything when you join a chat.`;
+}
+
+function storeAoeSet(id, profile_id) {
+    if (profile_id) store.set(`${id}:profile_id`, profile_id);
+}
+
+function setAoeCommand(command, id) {
+    let aoe_id;
+    let success = [];
+    let info;
+    let fail;
+
+    // Set URL
+    const idMatch = command.match(/profile_id (\w*)%?\s?/);
+    if (idMatch && idMatch.length && idMatch[1]) {
+        aoe_id = idMatch[1];
+    };
+
+    if (!aoe_id) {
+        return '';
+    }
+
+    if (aoe_id) {        
+        if (Number.parseInt(aoe_id)) {
+            success.push(`to <${aoe_id}>`);
+            storeAoeSet(id, aoe_id);
+        } else {
+            info = `Sorry, your aoe profile id does not seem valid`;
+        }
+    }
+
+    // Compose Message
+    reply = success.length ? '\n' + getRandomSuccess() + '\n' + `I'll set your aoe profile_id ` + success.join(' ') + '.' : '';
+    reply += fail ? '\n' + getRandomFailure() + '\n' + fail : '';
+    reply += info ? '\n' + info : '';
+
+    return reply;
+}
+
+async function viewAoeCommand(command, id) {
+    const profile_id = await store.get(`${id}:profile_id`);
+    if (!profile_id) return `I've got nothing for ya.`;
+    let reply = '';
+    reply += profile_id ? '\n' + '**profile_id**: ' + profile_id : '';
+
+    return reply;
+}
+
+function helpAoeCommand() {
+    let reply = '';
+    reply += '\n' + `:wave: Hey! I'm the Wololo Bot.`;
+    reply += '\n' + `I give you insights about your aoe2de games.`;
+    reply += '\n' + `You can get my attention with !aoe and then enter the command`;
+    reply += '\n' + '**help**: View this message! You are here.';
+    reply += '\n' + '**view**: View your profile_id';
+    reply += '\n' + '**clear**: Clear your profile_id';
+    reply += '\n' + '**set**: Set your profile_id';
+    reply += '\n' +  '**last_match**: Get details about your last match';
+    reply += '\n' + 'Example: !aoe set profile_id 3010325';
+    reply += '\n' + 'You can find your profile_id in the address bar at https://www.aoe2insights.com/';
+
+    return reply;
+}
+
+function clearAoeCommand(id) {
+    store.delete(`${id}:profile_id`);
+
+    return `Cleared out profile_id.`;
+}
+
+async function getLastAoeMatchDetails(id){
+    let reply = '';
+    const profile_id = await store.get(`${id}:profile_id`);
+    if (!profile_id) return `Set your profile_id first you 🤡`;
+    try {
+        const response = await fetch(`https://aoe2.net/api/player/lastmatch?game=aoe2de&profile_id=${profile_id}`)
+        const matchData = await response.json();
+        console.log(matchData)
+        console.log(matchData)
+        const date = Date(matchData.last_match.started)
+        reply += '\n' + `Player ${matchData.name} from ${matchData.country} played a game on ${date}`;
+        reply += matchData.last_match.average_rating ? '\n' + `Avg rating was ${matchData.last_match.average_rating}` : '';
+        reply += '\n' + `Map was ${convertMap(matchData.last_match.map_type)}`;
+        reply += '\n' + `${matchData.last_match.num_players} players were in the game:`;
+
+        matchData.last_match.players.map((player) => {
+            reply += '\n' + `   **${player.name}**`;
+            reply += player.won ? ' - **WON**' :' - **LOST**';
+            reply += '\n' + `Team Rating: ${player.rating}`;
+            reply += player.country ? ` | Country: ${player.country}` : '';
+            reply += ` | Civ: ${convertCiv(player.civ)}`;
+            //reply += ` | CivAlpha: ${player.civ_alpha}`;
+            reply += player.streak ? ` | WinStreak: ${player.streak}` :'';
+            reply += player.wins ? ` | Wins: ${player.wins}` :'';
+            reply += player.rating_change ? ` | Rating Change: ${player.rating_change}` :'';
+            
+        })
+        reply += '\n' + `You can find more insights for the game at https://www.aoe2insights.com/match/${matchData.last_match.match_id}/analysis`;
+
+    } catch(error) {
+        reply += '\n' + 'Fetch failed with error:' + error.message
+    }
+    
+    return reply;
+}
+
+function convertCiv(civ_id){
+    const civ_mapping = [{"id":1,"string":"Britons"},{"id":2,"string":"Franks"},{"id":3,"string":"Goths"},{"id":4,"string":"Teutons"},{"id":5,"string":"Japanese"},{"id":6,"string":"Chinese"},{"id":7,"string":"Byzantines"},{"id":8,"string":"Persians"},{"id":9,"string":"Saracens"},{"id":10,"string":"Turks"},{"id":11,"string":"Vikings"},{"id":12,"string":"Mongols"},{"id":13,"string":"Celts"},{"id":14,"string":"Spanish"},{"id":15,"string":"Aztecs"},{"id":16,"string":"Mayans"},{"id":17,"string":"Huns"},{"id":18,"string":"Koreans"},{"id":19,"string":"Italians"},{"id":20,"string":"Indians"},{"id":21,"string":"Incas"},{"id":22,"string":"Magyars"},{"id":23,"string":"Slavs"},{"id":24,"string":"Portuguese"},{"id":25,"string":"Ethiopians"},{"id":26,"string":"Malians"},{"id":27,"string":"Berbers"},{"id":28,"string":"Khmer"},{"id":29,"string":"Malay"},{"id":30,"string":"Burmese"},{"id":31,"string":"Vietnamese"},{"id":32,"string":"Bulgarians"},{"id":33,"string":"Tatars"},{"id":34,"string":"Cumans"},{"id":35,"string":"Lithuanians"},{"id":36,"string":"Burgundians"},{"id":37,"string":"Sicilians"},{"id":38,"string":"Poles"},{"id":39,"string":"Bohemians"}]
+
+    const civ_name = civ_mapping.filter(function (mapping) {
+      return mapping.id === civ_id;
+    });
+    return(civ_name[0].string);
+}
+
+function convertMap(map_id){
+    const map_mapping = [{"id":9,"string":"Arabia"},{"id":10,"string":"Archipelago"},{"id":11,"string":"Baltic"},{"id":12,"string":"Black Forest"},{"id":13,"string":"Coastal"},{"id":14,"string":"Continental"},{"id":15,"string":"Crater Lake"},{"id":16,"string":"Fortress"},{"id":17,"string":"Gold Rush"},{"id":18,"string":"Highland"},{"id":19,"string":"Islands"},{"id":20,"string":"Mediterranean"},{"id":21,"string":"Migration"},{"id":22,"string":"Rivers"},{"id":23,"string":"Team Islands"},{"id":24,"string":"Full Random"},{"id":25,"string":"Scandinavia"},{"id":26,"string":"Mongolia"},{"id":27,"string":"Yucatan"},{"id":28,"string":"Salt Marsh"},{"id":29,"string":"Arena"},{"id":31,"string":"Oasis"},{"id":32,"string":"Ghost Lake"},{"id":33,"string":"Nomad"},{"id":49,"string":"Iberia"},{"id":50,"string":"Britain"},{"id":51,"string":"Mideast"},{"id":52,"string":"Texas"},{"id":53,"string":"Italy"},{"id":54,"string":"Central America"},{"id":55,"string":"France"},{"id":56,"string":"Norse Lands"},{"id":57,"string":"Sea of Japan (East Sea)"},{"id":58,"string":"Byzantium"},{"id":59,"string":"Custom"},{"id":60,"string":"Random Land Map"},{"id":62,"string":"Random Real World Map"},{"id":63,"string":"Blind Random"},{"id":65,"string":"Random Special Map"},{"id":66,"string":"Random Special Map"},{"id":67,"string":"Acropolis"},{"id":68,"string":"Budapest"},{"id":69,"string":"Cenotes"},{"id":70,"string":"City of Lakes"},{"id":71,"string":"Golden Pit"},{"id":72,"string":"Hideout"},{"id":73,"string":"Hill Fort"},{"id":74,"string":"Lombardia"},{"id":75,"string":"Steppe"},{"id":76,"string":"Valley"},{"id":77,"string":"MegaRandom"},{"id":78,"string":"Hamburger"},{"id":79,"string":"CtR Random"},{"id":80,"string":"CtR Monsoon"},{"id":81,"string":"CtR Pyramid Descent"},{"id":82,"string":"CtR Spiral"},{"id":83,"string":"Kilimanjaro"},{"id":84,"string":"Mountain Pass"},{"id":85,"string":"Nile Delta"},{"id":86,"string":"Serengeti"},{"id":87,"string":"Socotra"},{"id":88,"string":"Amazon"},{"id":89,"string":"China"},{"id":90,"string":"Horn of Africa"},{"id":91,"string":"India"},{"id":92,"string":"Madagascar"},{"id":93,"string":"West Africa"},{"id":94,"string":"Bohemia"},{"id":95,"string":"Earth"},{"id":96,"string":"Canyons"},{"id":97,"string":"Enemy Archipelago"},{"id":98,"string":"Enemy Islands"},{"id":99,"string":"Far Out"},{"id":100,"string":"Front Line"},{"id":101,"string":"Inner Circle"},{"id":102,"string":"Motherland"},{"id":103,"string":"Open Plains"},{"id":104,"string":"Ring of Water"},{"id":105,"string":"Snakepit"},{"id":106,"string":"The Eye"},{"id":107,"string":"Australia"},{"id":108,"string":"Indochina"},{"id":109,"string":"Indonesia"},{"id":110,"string":"Strait of Malacca"},{"id":111,"string":"Philippines"},{"id":112,"string":"Bog Islands"},{"id":113,"string":"Mangrove Jungle"},{"id":114,"string":"Pacific Islands"},{"id":115,"string":"Sandbank"},{"id":116,"string":"Water Nomad"},{"id":117,"string":"Jungle Islands"},{"id":118,"string":"Holy Line"},{"id":119,"string":"Border Stones"},{"id":120,"string":"Yin Yang"},{"id":121,"string":"Jungle Lanes"},{"id":122,"string":"Alpine Lakes"},{"id":123,"string":"Bogland"},{"id":124,"string":"Mountain Ridge"},{"id":125,"string":"Ravines"},{"id":126,"string":"Wolf Hill"},{"id":132,"string":"Antarctica"},{"id":133,"string":"Aral Sea"},{"id":134,"string":"Black Sea"},{"id":135,"string":"Caucasus"},{"id":136,"string":"Caucasus"},{"id":137,"string":"Custom Map Pool"},{"id":138,"string":"Custom Map Pool"},{"id":139,"string":"Golden Swamp"},{"id":140,"string":"Four Lakes"},{"id":141,"string":"Land Nomad"},{"id":142,"string":"BR Battle On Ice"},{"id":143,"string":"BR El Dorado"},{"id":144,"string":"BR Fall of Axum"},{"id":145,"string":"BR Fall of Rome"},{"id":146,"string":"BR Majapahit Empire"},{"id":147,"string":"Amazon Tunnel"},{"id":148,"string":"Coastal Forest"},{"id":149,"string":"African Clearing"},{"id":150,"string":"Atacama"},{"id":151,"string":"Seize the Mountain"},{"id":152,"string":"Crater"},{"id":153,"string":"Crossroads"},{"id":154,"string":"Michi"},{"id":155,"string":"Team Moats"},{"id":156,"string":"Volcanic Island"},{"id":157,"string":"Acclivity"},{"id":158,"string":"Eruption"},{"id":159,"string":"Frigid Lake"},{"id":160,"string":"Greenland"},{"id":161,"string":"Lowland"},{"id":162,"string":"Marketplace"},{"id":163,"string":"Meadow"},{"id":164,"string":"Mountain Range"},{"id":165,"string":"Northern Isles"},{"id":166,"string":"Ring Fortress"},{"id":167,"string":"Runestones"},{"id":168,"string":"Aftermath"},{"id":169,"string":"Enclosed"},{"id":170,"string":"Haboob"},{"id":171,"string":"Kawasan"},{"id":172,"string":"Land Madness"},{"id":173,"string":"Sacred Springs"},{"id":174,"string":"Wade"}]
+
+    const map_name = map_mapping.filter(function (mapping) {
+      return mapping.id === map_id;
+    });
+    return(map_name[0].string);
 }
