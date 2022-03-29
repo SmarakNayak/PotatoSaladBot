@@ -62,7 +62,7 @@ client.on('voiceStateUpdate', async (oldMember, newMember) => {
         if (oldChannel) oldChannelMembers = oldChannel.members;
         if (newChannel) newChannelMembers = newChannel.members;
 
-        if (newChannelMembers !== oldChannelMembers && newChannelMembers && newMember.member.user.username !== "AJ_BOT") {
+        if (newChannelMembers !== oldChannelMembers && newChannelMembers && newMember.member.user.id !== client.user.id) {
             console.log(`${newMember.member.user.username} has joined ${newChannel.name}.`);
             var song = await store.get(`${newMember.id}:url`);
             var vol = await store.get(`${newMember.id}:volume`);
