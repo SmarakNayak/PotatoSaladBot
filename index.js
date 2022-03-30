@@ -397,7 +397,19 @@ async function viewAoeCommand(command, id) {
     if (!profile_id) return `I've got nothing for ya.`;
     let reply = '';
     reply += profile_id ? '\n' + '**profile_id**: ' + profile_id : '';
+    try {
+        const single_response = await fetch(`https://aoe2.net/api/nightbot/rank?profile_id=${profile_id}&leaderboard_id=3`)
+        const multi_response = await fetch(`https://aoe2.net/api/nightbot/rank?profile_id=${profile_id}&leaderboard_id=4`)
+        const single_data = await single_response.text();
+        const multi_data = await multi_response.text();
+        
+        reply += '\n' + `**Single Player** ${single_data}`;
+        reply += '\n' + `**Multi Player** ${multi_data}`;
 
+    } catch(error) {
+        reply += '\n' + 'Fetch failed with error:' + error.message
+    }
+    
     return reply;
 }
 
