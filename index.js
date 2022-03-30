@@ -115,7 +115,7 @@ client.on('voiceStateUpdate', async (oldMember, newMember) => {
                 try{
                     connection.destroy()
                 } catch (error) {
-                    console.log(error)
+                    console.log("NOTE: ", error.message)
                 }                
             });
 
@@ -126,7 +126,7 @@ client.on('voiceStateUpdate', async (oldMember, newMember) => {
                         try{                    
                             connection.destroy()
                         } catch (error) {
-                            console.log(error)
+                            console.log("NOTE: ", error.message)
                         }
                     }, len * 1000);
                 }
