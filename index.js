@@ -106,7 +106,8 @@ client.on('voiceStateUpdate', async (oldMember, newMember) => {
                                                 opusEncoded: false,
                                                 fmt: "mp3",
                                                 seek: start});
-            const resource = await createAudioResource(stream, { inputType: StreamType.Arbitrary });
+            const resource = await createAudioResource(stream, { inputType: StreamType.Arbitrary, inlineVolume: true });
+            resource.volume.setVolume(vol);
             const player = await createAudioPlayer();
             player.play(resource);
             connection.subscribe(player);
@@ -282,14 +283,16 @@ function setCommand(command, id) {
 
     if (volume) {
         if (Number.parseInt(volume)) {
-            if ((volume > 0 && volume < 101)) {
+            if ((volume > 0 && volume < 1001)) {
                 success.push(`at ${volume}%`);
                 storeSet(id, null, null, (volume / 100));
+            } else if (volume>1000) {
+                info = `You're a lunatic mate, people have work in the morning. Not setting the volume to that.\nhttps://tenor.com/view/stop-get-some-help-gif-8670192`;
             } else {
-                info = `Sorry, but I couldn't tell what you wanted for volume for I am a simple bot and I only know how to count from 1 to 100.`;
+                info = `Sorry, but I couldn't tell what you wanted for volume for I am a simple bot and I only know how to count from 1 to 1000.`;
             }
         } else {
-            info = `Sorry, but can't tell what you want for volume. You have to use a number from 0 to 100. "Turn it up to 11" doesn't count.`;
+            info = `Sorry, but can't tell what you want for volume. You have to use a number from 0 to 10000. "Turn it up to 11" doesn't count.`;
         }
         
     }
