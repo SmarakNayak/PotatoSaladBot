@@ -84,8 +84,9 @@ client.on('voiceStateUpdate', async (oldMember, newMember) => {
         if (oldChannel) oldChannelMembers = oldChannel.members;
         if (newChannel) newChannelMembers = newChannel.members;
 
-        if (newChannelMembers !== oldChannelMembers && newChannelMembers && newMember.member.user.id !== client.user.id) {
+        if (newChannelMembers !== oldChannelMembers && newChannelMembers && newMember.member.user.id !== client.user.id && oldChannel?.id!==newChannel?.id) {
             console.log(`${newMember.member.user.username} has joined ${newChannel.name}.`);
+
             var song = await store.get(`${newMember.id}:url`);
             var vol = await store.get(`${newMember.id}:volume`);
             var len = await store.get(`${newMember.id}:length`);
@@ -184,7 +185,7 @@ function getRandomFailure() {
     const failureStatements = [
         'POTATO POWERS...uh, deactivate.',
         'whomp whomp.',
-        'Hey so this is awkard...',
+        'Hey so this is awkward...',
         'Sad face.',
         `Wait this isn't AI at all! This is just a bunch of If statments in a trenchcoat!`,
         ':broken_heart:',
