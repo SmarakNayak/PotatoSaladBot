@@ -52,6 +52,7 @@ client.on('messageCreate', async message => {
         }
         message.reply(reply || randomWhatever());
     }
+
     const botAoeCmd = '!aoe';
     if (message.content.startsWith(botAoeCmd)) {
         const command = message.content.substr(botAoeCmd.length).trim();
@@ -72,6 +73,24 @@ client.on('messageCreate', async message => {
                 reply = await getLastAoeMatchDetails(message.author.id)
             }
         }
+        message.reply(reply || randomWhatever());
+    }
+
+    const botWedCmd = '!play';
+    if (message.content.startsWith(botWedCmd)) {
+        const Guild = client.guilds.cache.get(message.guildId); // Getting the guild.
+        const Member = Guild.members.cache.get(message.author.id); // Getting the member.
+        const Channel = Member.voice.channel;
+        const command = message.content.substr(botWedCmd.length).trim();
+        if (Channel) { // Checking if the member is connected to a VoiceChannel.
+            if (command.startsWith('wednesday')) {                
+                reply = 'It is wednesday my dudes'
+                playMusic(Channel, "https://youtu.be/PE8GlPpuLuY")
+            }
+        } else {
+            // The member is not connected to a voice channel.
+            reply = 'Join a voice channel first fam';
+        };
         message.reply(reply || randomWhatever());
     }
 });
@@ -284,10 +303,10 @@ function setCommand(command, id) {
 
     if (volume) {
         if (Number.parseInt(volume)) {
-            if ((volume > 0 && volume < 1001)) {
+            if ((volume > 0 && volume < 10001)) {
                 success.push(`at ${volume}%`);
                 storeSet(id, null, null, (volume / 100));
-            } else if (volume>1000) {
+            } else if (volume>10000) {
                 info = `You're a lunatic mate, people have work in the morning. Not setting the volume to that.\nhttps://tenor.com/view/stop-get-some-help-gif-8670192`;
             } else {
                 info = `Sorry, but I couldn't tell what you wanted for volume for I am a simple bot and I only know how to count from 1 to 1000.`;
@@ -454,7 +473,7 @@ async function getLastAoeMatchDetails(id){
 
         matchData.last_match.players.map((player) => {
             reply += '\n' + `   **${player.name}**`;
-            reply += player.won ? ' - **WON**   👑' :' - **LOST**   🤡';
+            reply += player.won === true ? ' - **WON**   👑' : player.won === false ? ' - **LOST**   🤡' : ``;
             reply += '\n' + `Team Rating: ${player.rating}`;
             reply += player.country ? ` | Country: ${player.country}` : '';
             reply += ` | Civ: ${convertCiv(player.civ)}`;
@@ -489,4 +508,47 @@ function convertMap(map_id){
       return mapping.id === map_id;
     });
     return(map_name[0].string);
+}
+
+async function playMusic(Channel, song, start = 0, vol = 1, len = -1){
+    try{
+        const connection = await joinVoiceChannel({
+            channelId: Channel.id,
+            guildId: Channel.guild.id,
+            adapterCreator: Channel.guild.voiceAdapterCreator
+        })
+        const stream = await ytdl(song, {   filter: 'audioonly',
+                                            opusEncoded: false,
+                                            fmt: "mp3",
+                                            seek: start});
+        const resource = await createAudioResource(stream, { inputType: StreamType.Arbitrary, inlineVolume: true });
+        resource.volume.setVolume(vol);
+        const player = await createAudioPlayer();
+        player.play(resource);
+        connection.subscribe(player);
+
+        player.on(AudioPlayerStatus.Idle, () => {
+            try{
+                connection.destroy()
+            } catch (error) {
+                console.log("NOTE: ", error.message)
+            }                
+        });
+
+        player.on(AudioPlayerStatus.Playing, () => {
+            console.log("Stream started")
+            if(len !== -1) {
+                setTimeout(() => {
+                    try{                    
+                        connection.destroy()
+                    } catch (error) {
+                        console.log("NOTE: ", error.message)
+                    }
+                }, len * 1000);
+            }
+        })
+    } catch(error) {
+        console.log("Playing music failed:", error)
+    }
+
 }
