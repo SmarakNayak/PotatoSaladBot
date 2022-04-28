@@ -83,10 +83,32 @@ client.on('messageCreate', async message => {
         const Channel = Member.voice.channel;
         const command = message.content.substr(botWedCmd.length).trim();
         if (Channel) { // Checking if the member is connected to a VoiceChannel.
+            if (command.startsWith('tuesday')) {                
+                reply = 'It also love makonnen'
+                playMusic(Channel, "https://www.youtube.com/watch?v=avFq9errZCk", 18, 17)
+            }
             if (command.startsWith('wednesday')) {                
                 reply = 'It is wednesday my dudes'
-                playMusic(Channel, "https://youtu.be/PE8GlPpuLuY")
+                playMusic(Channel, "https://youtu.be/PE8GlPpuLuY", 5, 15)
             }
+            if (command.startsWith('friday')) {                
+                reply = 'seriously.............'
+                playMusic(Channel, "https://www.youtube.com/watch?v=kfVsfOSbJY0", 44, 5, 0.5)
+            }
+            if (command.startsWith('another')) {                
+                reply = 'Another one.'
+                playMusic(Channel, "https://www.youtube.com/watch?v=fYpx8oDMQBU", 5, 4)
+            }
+            if (command.startsWith('win')) {                
+                reply = 'All we do is WIN YEAAAAAAAHHHHHH'
+                playMusic(Channel, "https://www.youtube.com/watch?v=kkkdbasZMAE", 0, 12)
+            }
+            if (command.startsWith('uno')) {                
+                reply = 'AYE ESPANYOL'
+                playMusic(Channel, "https://www.youtube.com/watch?v=2fE-2Nhmnns", 13, 3)
+            }
+
+            
         } else {
             // The member is not connected to a voice channel.
             reply = 'Join a voice channel first fam';
@@ -510,7 +532,7 @@ function convertMap(map_id){
     return(map_name[0].string);
 }
 
-async function playMusic(Channel, song, start = 0, vol = 1, len = -1){
+async function playMusic(Channel, song, start = 0, len = -1, vol = 1){
     try{
         const connection = await joinVoiceChannel({
             channelId: Channel.id,
