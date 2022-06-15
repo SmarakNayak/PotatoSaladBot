@@ -76,15 +76,30 @@ client.on('messageCreate', async message => {
         message.reply(reply || randomWhatever());
     }
 
-    const botWedCmd = '!play';
-    if (message.content.startsWith(botWedCmd)) {
+    const botHackCmd = '!hack';
+    if (message.content.startsWith(botHackCmd)) {
+        const command = message.content.substr(botHackCmd.length).trim();
+        if (command) {
+            if (command.startsWith('bungie')) {
+                reply = '0 day exploit found. Executing hack on Bungie APACHE v3.422.1 servers. ETA is 30m';
+            }
+        }
+        message.reply(reply || randomWhatever());
+    }
+
+    const botPlayCmd = '!play';
+    if (message.content.startsWith(botPlayCmd)) {
         const Guild = client.guilds.cache.get(message.guildId); // Getting the guild.
         const Member = Guild.members.cache.get(message.author.id); // Getting the member.
         const Channel = Member.voice.channel;
-        const command = message.content.substr(botWedCmd.length).trim();
+        const command = message.content.substr(botPlayCmd.length).trim();
         if (Channel) { // Checking if the member is connected to a VoiceChannel.
+            if (command.startsWith('monday')) {                
+                reply = 'Ho chi MAMA'
+                playMusic(Channel, "https://www.youtube.com/watch?v=0Y4BgcEjwuw", 70, 15, 0.5)
+            }
             if (command.startsWith('tuesday')) {                
-                reply = 'It also love makonnen'
+                reply = 'I also love makonnen'
                 playMusic(Channel, "https://www.youtube.com/watch?v=avFq9errZCk", 18, 17)
             }
             if (command.startsWith('wednesday')) {                
@@ -107,7 +122,46 @@ client.on('messageCreate', async message => {
                 reply = 'AYE ESPANYOL'
                 playMusic(Channel, "https://www.youtube.com/watch?v=2fE-2Nhmnns", 13, 3)
             }
-
+            if (command.startsWith('goteem')) {                
+                reply = 'LADIES AND GENTEELMEN'
+                playMusic(Channel, "https://www.youtube.com/watch?v=ckcDG1j5jWo", 13, 14, 0.5)
+            }
+            if (command.startsWith('8')) {                
+                reply = 'All hail!'
+                playMusic(Channel, "https://www.youtube.com/watch?v=b2bqGXdJN9o", 12, 4)
+            }
+            if (command.startsWith('10')) {                
+                reply = 'Back to aoe'
+                playMusic(Channel, "https://www.youtube.com/watch?v=b2bqGXdJN9o", 17, 3)
+            }
+            if (command.startsWith('11')) {                
+                reply = 'HAHAHAHAHAHaaa!'
+                playMusic(Channel, "https://www.youtube.com/watch?v=b2bqGXdJN9o", 20, 4)
+            }
+            if (command.startsWith('12')) {                
+                reply = 'AH!'
+                playMusic(Channel, "https://www.youtube.com/watch?v=b2bqGXdJN9o", 25, 2)
+            }
+            if (command.startsWith('14')) {                
+                reply = 'Start the game already!'
+                playMusic(Channel, "https://www.youtube.com/watch?v=b2bqGXdJN9o", 28, 2)
+            }
+            if (command.startsWith('15')) {                
+                reply = 'Dont point that thang at me'
+                playMusic(Channel, "https://www.youtube.com/watch?v=b2bqGXdJN9o", 30, 2)
+            }
+            if (command.startsWith('19')) {                
+                reply = 'Long time no siege'
+                playMusic(Channel, "https://www.youtube.com/watch?v=b2bqGXdJN9o", 37, 2)
+            }
+            if (command.startsWith('20')) {                
+                reply = 'My granny'
+                playMusic(Channel, "https://www.youtube.com/watch?v=b2bqGXdJN9o", 39, 2)
+            }
+            if (command.startsWith('22')) {                
+                reply = 'Quit touching me'
+                playMusic(Channel, "https://www.youtube.com/watch?v=b2bqGXdJN9o", 40, 2)
+            }
             
         } else {
             // The member is not connected to a voice channel.
@@ -340,9 +394,14 @@ function setCommand(command, id) {
     }
 
     if (start) {
+        console.log(start);
+        console.log(Number.parseInt(start));
         if (Number.parseInt(start)) {
             success.push(`starting from ${start} seconds`);
             storeSet(id, null, null, null, Number.parseInt(start));
+        } else if (Number.parseInt(start) === 0) {
+            success.push(`starting from the beginning`);
+            store.delete(`${id}:start`);
         } else {
             info = `Sorry, I can't tell what you want for start. I only understand numbers`;
         }
