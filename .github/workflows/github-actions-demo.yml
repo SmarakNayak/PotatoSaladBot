@@ -43,8 +43,8 @@ jobs:
       #- name: Stop the app if running
       #  run: ssh staging 'sudo systemctl stop my-application'
         
-      - name: Add Github SSH key
-        run: ssh staging 'echo "$GITHUB_SSH_KEY" > ~/.ssh/id_ed25519'
+      - name: Add Github SSH key and adjust permissions
+        run: ssh staging 'echo "$GITHUB_SSH_KEY" > ~/.ssh/id_ed25519; chmod 700 ~/.ssh/; chmod 600 ~/.ssh/id_ed25519'
         env: 
           GITHUB_SSH_KEY: ${{ secrets.REMOTE_GITHUB_SSH_KEY }}
 
