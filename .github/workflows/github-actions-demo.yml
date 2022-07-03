@@ -14,7 +14,6 @@ jobs:
       - name: List files in the repository
         run: |
           ls ${{ github.workspace }}
-      - run: echo "🍏 This job's status is ${{ job.status }}."
       - name: Deploy to EC2
         uses: easingthemes/ssh-deploy@main
         env:
@@ -22,3 +21,4 @@ jobs:
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           EXCLUDE: "/dist/, /node_modules/"
+      - run: echo "🍏 This job's status is ${{ job.status }}."
