@@ -44,7 +44,9 @@ jobs:
       #  run: ssh staging 'sudo systemctl stop my-application'
         
       - name: Add Github SSH key
-        run: ssh staging 'echo ${{ secrets.REMOTE_GITHUB_SSH_KEY }} > ~/.ssh/id_ed25519'
+        run: ssh staging 'echo "$GITHUB_SSH_KEY" > ~/.ssh/id_ed25519'
+        env: 
+          GITHUB_SSH_KEY: ${{ secrets.REMOTE_GITHUB_SSH_KEY }}
 
       - name: Check out the new code from Github
         run: ssh staging 'git -C PotatoSaladBot pull || git clone git@github.com:SmarakNayak/PotatoSaladBot.git'
