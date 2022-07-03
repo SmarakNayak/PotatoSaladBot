@@ -47,7 +47,7 @@ jobs:
         run: ssh staging 'echo "$REMOTE_HOST" > ~/.ssh/id_ed25519; chmod 700 ~/.ssh/; chmod 600 ~/.ssh/id_ed25519'
         env: 
           GITHUB_SSH_KEY: ${{ secrets.REMOTE_GITHUB_SSH_KEY }}
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_HOST: test_lol
           
       - name: Check Github SSH key
         run: ssh staging 'cat ~/.ssh/id_ed25519; cat ~/.ssh/id_ed25519_2'
