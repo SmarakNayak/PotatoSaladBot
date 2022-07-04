@@ -43,8 +43,8 @@ jobs:
         run: ssh staging 'curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | bash; . ~/.nvm/nvm.sh; nvm install 16.14.2;'
         
       - name: Install node dependencies
-        run: ssh staging 'cd PotatoSaladBot; . ~/.nvm/nvm.sh; nvm alias; echo $PATH; npm install discordjs/opus; npm install;'
+        run: ssh staging 'cd PotatoSaladBot; . ~/.nvm/nvm.sh; npm install discordjs/opus; npm install;'
 
-      #- name: Start the app
-      #  if: ${{ always() }}
-      #  run: ssh staging 'sudo systemctl start my-application'
+      - name: Start the app
+        if: ${{ always() }}
+        run: ssh staging 'cd PotatoSaladBot; . ~/.nvm/nvm.sh; npm run start;'
