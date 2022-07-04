@@ -1,0 +1,53 @@
+name: GitHub Actions Demo
+on: [push]
+jobs:
+  Explore-GitHub-Actions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_KEY" > ~/.ssh/staging.key
+          chmod 600 ~/.ssh/staging.key
+          cat >>~/.ssh/config <<END
+          Host staging
+            HostName $SSH_HOST
+            User $SSH_USER
+            IdentityFile ~/.ssh/staging.key
+            StrictHostKeyChecking no
+          END
+        env:
+          SSH_USER: ${{ secrets.REMOTE_USER }}
+          SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+          SSH_HOST: ${{ secrets.REMOTE_HOST }}
+
+      - name: Stop the app if running
+        run: ssh staging 'sudo systemctl stop discord-bot'
+        
+      - name: Add Github SSH key and adjust permissions
+        run: ssh staging 'echo "${{env.GITHUB_SSH_KEY}}" > ~/.ssh/id_ed25519; chmod 700 ~/.ssh/; chmod 600 ~/.ssh/id_ed25519'
+        env: 
+          GITHUB_SSH_KEY: ${{ secrets.REMOTE_GITHUB_SSH_KEY }}
+        # Doesn't work unless secret is referred to using braces, possibly due to single quotes
+
+      - name: Check out the new code from Github
+        run: ssh staging 'git -C PotatoSaladBot pull || git clone git@github.com:SmarakNayak/PotatoSaladBot.git'
+        # This pulls if directory exists, otherwise clones
+        
+      - name: Create .env file
+        run: ssh staging 'echo "BOT_TOKEN = ${{env.BOT_TOKEN}}" > ~/PotatoSaladBot/.env'
+        env: 
+          BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
+      
+      - name: Install node 16.14.2
+        run: ssh staging 'curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | bash; . ~/.nvm/nvm.sh; nvm install 16.14.2;'
+        
+      - name: Install node dependencies
+        run: ssh staging 'cd PotatoSaladBot; . ~/.nvm/nvm.sh; npm install discordjs/opus; npm install;'
+        
+      - name: Set up systemd service
+        run: ssh staging 'chmod +x PotatoSaladBot/start.sh; sudo cp PotatoSaladBot/discord-bot.service /etc/systemd/system/discord-bot.service'
+
+      - name: Start the app
+        if: ${{ always() }}
+        run: ssh staging 'sudo systemctl start discord-bot'
