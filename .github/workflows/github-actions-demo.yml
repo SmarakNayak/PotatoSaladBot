@@ -43,7 +43,7 @@ jobs:
         run: ssh staging 'curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | bash; . ~/.nvm/nvm.sh; nvm install 16.14.2;'
         
       - name: Install node dependencies
-        run: ssh staging 'cd PotatoSaladBot; . ~/.nvm/nvm.sh; npm install discordjs/opus; npm install;'
+        run: ssh staging 'cd PotatoSaladBot; . ~/.nvm/nvm.sh; npm install discordjs/opus; npm install; sudo apt-get install ffmpeg; youtube-dl -U;'
         
       - name: Set up systemd service
         run: ssh staging 'chmod +x PotatoSaladBot/start.sh; sudo cp PotatoSaladBot/discord-bot.service /etc/systemd/system/discord-bot.service'
