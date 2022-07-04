@@ -33,12 +33,17 @@ jobs:
       - name: Check out the new code from Github
         run: ssh staging 'git -C PotatoSaladBot pull || git clone git@github.com:SmarakNayak/PotatoSaladBot.git'
         # This pulls if directory exists, otherwise clones
+        
+      - name: Create .env file
+        run: ssh staging 'echo "BOT_TOKEN = ${{env.BOT_TOKEN}}" > ~/PotatoSaladBot/.env'
+        env: 
+          BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
       
       - name: Install node 16.14.2
         run: ssh staging 'curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | bash; . ~/.nvm/nvm.sh; nvm install 16.14.2;'
         
       - name: Install node dependencies
-        run: ssh staging 'cd PotatoSaladBot; . ~/.nvm/nvm.sh; nvm alias; echo $PATH; npm install discordjs/opus; npm install; npm run start'
+        run: ssh staging 'cd PotatoSaladBot; . ~/.nvm/nvm.sh; nvm alias; echo $PATH; npm install discordjs/opus; npm install;'
 
       #- name: Start the app
       #  if: ${{ always() }}
