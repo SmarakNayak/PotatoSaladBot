@@ -1,0 +1,11 @@
+[Unit]
+Description=DiscordBotService
+
+[Service]
+Type=simple
+User=ubuntu
+ExecStart=/home/ubuntu/PotatoSaladBot/start.sh
+WorkingDirectory=/home/ubuntu/PotatoSaladBot
+
+[Install]
+WantedBy=multi-user.target

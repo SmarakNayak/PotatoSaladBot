@@ -1,6 +1,7 @@
 require('dotenv').config();
 const ytdl = require('discord-ytdl-core');
 const Keyv = require('keyv');
+const { KeyvFile } = require('keyv-file');
 const moment = require('moment');
 const random = require('@cspruit/serendipity').random;
 const { Client, Intents } = require('discord.js');
@@ -25,7 +26,7 @@ const client = new Client({ intents: [Intents.FLAGS.GUILDS,
                                       Intents.FLAGS.GUILD_PRESENCES,
                                       Intents.FLAGS.GUILD_VOICE_STATES] });
 
-const store = new Keyv(`mysql://${process.env.MYSQL_USER}:${process.env.MYSQL_PASS}@localhost:${process.env.MYSQL_PORT}/${process.env.MYSQL_DB_NAME}`);
+const store = new Keyv({store: new KeyvFile({filename: 'entryMusic.json'})});
 store.on('error', err => console.error('Keyv connection error:', err));
 
 client.on('ready', () => {
