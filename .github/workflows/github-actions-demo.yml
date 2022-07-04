@@ -21,8 +21,8 @@ jobs:
           SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
           SSH_HOST: ${{ secrets.REMOTE_HOST }}
 
-      #- name: Stop the app if running
-      #  run: ssh staging 'sudo systemctl stop my-application'
+      - name: Stop the app if running
+        run: ssh staging 'sudo systemctl stop discord-bot'
         
       - name: Add Github SSH key and adjust permissions
         run: ssh staging 'echo "${{env.GITHUB_SSH_KEY}}" > ~/.ssh/id_ed25519; chmod 700 ~/.ssh/; chmod 600 ~/.ssh/id_ed25519'
@@ -44,7 +44,10 @@ jobs:
         
       - name: Install node dependencies
         run: ssh staging 'cd PotatoSaladBot; . ~/.nvm/nvm.sh; npm install discordjs/opus; npm install;'
+        
+      - name: Set up systemd service
+        run: ssh staging 'chmod +x PotatoSaladBot/start.sh; sudo cp PotatoSaladBot/discord-bot.service /etc/systemd/system/discord-bot.service'
 
       - name: Start the app
         if: ${{ always() }}
-        run: ssh staging 'cd PotatoSaladBot; . ~/.nvm/nvm.sh; npm run start;'
+        run: ssh staging 'sudo systemctl start discord-bot'
