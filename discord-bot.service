@@ -1,11 +1,15 @@
 [Unit]
 Description=DiscordBotService
+StartLimitIntervalSec=300
+StartLimitBurst=5
 
 [Service]
 Type=simple
 User=ubuntu
 ExecStart=/home/ubuntu/PotatoSaladBot/start.sh
 WorkingDirectory=/home/ubuntu/PotatoSaladBot
+Restart=on-failure
+RestartSec=1s
 
 [Install]
 WantedBy=multi-user.target
