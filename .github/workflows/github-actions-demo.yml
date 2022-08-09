@@ -46,7 +46,7 @@ jobs:
         run: ssh staging 'cd PotatoSaladBot; . ~/.nvm/nvm.sh; npm install discordjs/opus; npm install; sudo apt-get -y install ffmpeg;'
         
       - name: Set up systemd service
-        run: ssh staging 'chmod +x PotatoSaladBot/start.sh; sudo cp PotatoSaladBot/discord-bot.service /etc/systemd/system/discord-bot.service'
+        run: ssh staging 'chmod +x PotatoSaladBot/start.sh; sudo cp PotatoSaladBot/discord-bot.service /etc/systemd/system/discord-bot.service; sudo systemctl daemon-reload;'
 
       - name: Start the app
         if: ${{ always() }}

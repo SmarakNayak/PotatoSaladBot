@@ -128,7 +128,7 @@ client.on('messageCreate', async message => {
             }
             if (command.startsWith('uno')) {                
                 reply = 'AYE ESPANYOL'
-                playMusic(Channel, "https://www.youtube.com/watch?v=2fE-2Nhmnns", 13, 3)
+                playMusic(Channel, "https://www.youtube.com/watch?v=2fE-2Nhmnns", 13, 4)
             }
             if (command.startsWith('goteem')) {                
                 reply = 'LADIES AND GENTEELMEN'
