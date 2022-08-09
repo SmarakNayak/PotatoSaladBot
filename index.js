@@ -85,6 +85,13 @@ client.on('messageCreate', async message => {
                 reply = '0 day exploit found. Executing hack on Bungie APACHE v3.422.1 servers. ETA is 30m';
             }
         }
+        if (command) {
+            if (command.startsWith('kill')) {
+                reply = 'Why u wanna kill me. AHHH HELppp';
+                message.reply(reply || randomWhatever());
+                throw new Error('Bot killed manually');
+            }
+        }
         message.reply(reply || randomWhatever());
     }
 
@@ -230,6 +237,16 @@ client.on('voiceStateUpdate', async (oldMember, newMember) => {
                 }
             })
 
+            player.on('error', error => {
+                console.log(`Audio error: ${error.message} with resource ${error.resource.metadata.title}`);
+                console.log(error);
+                try{
+                    connection.destroy()
+                } catch (e) {
+                    console.log("NOTE: ", e.message)
+                }
+            });
+
             // Use your indoor voice, Potato.
             // dispatcher.setVolume(vol || defaultVolume);
         }
@@ -238,6 +255,14 @@ client.on('voiceStateUpdate', async (oldMember, newMember) => {
     }
     
 });
+
+client.on('uncaughtException', function (err) {
+  console.log("Unhandled discord exception:", err);
+})
+
+client.on('error', function (err) {
+  console.log("Unhandled discord client error:", err);
+})
 
 client.login(process.env.BOT_TOKEN);
 
@@ -627,7 +652,18 @@ async function playMusic(Channel, song, start = 0, len = -1, vol = 1){
                     }
                 }, len * 1000);
             }
-        })
+        });
+
+        player.on('error', error => {
+            console.log(`Audio error: ${error.message} with resource ${error.resource.metadata.title}`);
+            console.log(error);
+            try{
+                connection.destroy()
+            } catch (e) {
+                console.log("NOTE: ", e.message)
+            }
+        });
+
     } catch(error) {
         console.log("Playing music failed:", error)
     }
