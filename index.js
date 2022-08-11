@@ -238,7 +238,7 @@ client.on('voiceStateUpdate', async (oldMember, newMember) => {
             })
 
             player.on('error', error => {
-                console.log(`Audio error: ${error.message} with resource ${error.resource.metadata.title}`);
+                console.log(`Audio error in voiceStateUpdate: ${error.message} with resource ${song}`);
                 console.log(error);
                 try{
                     connection.destroy()
@@ -655,7 +655,7 @@ async function playMusic(Channel, song, start = 0, len = -1, vol = 1){
         });
 
         player.on('error', error => {
-            console.log(`Audio error: ${error.message} with resource ${error.resource.metadata.title}`);
+            console.log(`Audio error in playMusic: ${error.message} with resource ${song}`);
             console.log(error);
             try{
                 connection.destroy()
